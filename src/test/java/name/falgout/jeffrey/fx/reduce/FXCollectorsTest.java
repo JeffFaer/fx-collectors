@@ -4,6 +4,9 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
@@ -71,5 +74,18 @@ public class FXCollectorsTest {
 
     objects.remove(o2);
     verify(downstream.remove()).accept(aggregate, o2);
+  }
+
+  @Test
+  public void reduceObservableValue() {
+    Property<Object> prop = new SimpleObjectProperty<>();
+    FXCollector<ObservableValue<Object>, ?, ?> coll = FXCollectors.observing(downstream);
+
+    FXCollectors.reduce(prop, coll);
+    verify(downstream.add()).accept(aggregate, null);
+
+    prop.setValue(new Object());
+    verify(downstream.remove()).accept(aggregate, null);
+    verify(downstream.add()).accept(aggregate, prop.getValue());
   }
 }

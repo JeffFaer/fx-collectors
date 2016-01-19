@@ -4,7 +4,7 @@ import java.util.List;
 
 import javafx.collections.ObservableList;
 
-abstract class SimpleObservingListCollector<T extends ObservableList<E>, A, R, E>
+public abstract class SimpleObservingListCollector<T extends ObservableList<E>, A, R, E>
     extends ObservingListCollector<T, A, R, T, E> {
   protected SimpleObservingListCollector() {}
 

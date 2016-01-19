@@ -6,7 +6,7 @@ import java.util.function.BiConsumer;
 
 import javafx.beans.Observable;
 
-abstract class ObservingCollector<T, A, R, O extends Observable>
+public abstract class ObservingCollector<T, A, R, O extends Observable>
     implements FXCollector<T, A, R> {
   private final Map<A, Map<T, Runnable>> subscriptions = new IdentityHashMap<>();
 

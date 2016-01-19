@@ -3,7 +3,7 @@ package name.falgout.jeffrey.fx.reduce;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 
-abstract class ObservingSetCollector<T, A, R, S extends ObservableSet<E>, E>
+public abstract class ObservingSetCollector<T, A, R, S extends ObservableSet<E>, E>
     extends ObservingCollector<T, A, R, S> {
   protected ObservingSetCollector() {}
 

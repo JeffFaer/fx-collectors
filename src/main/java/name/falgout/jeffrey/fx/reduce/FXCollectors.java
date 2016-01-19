@@ -1,5 +1,6 @@
 package name.falgout.jeffrey.fx.reduce;
 
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 
@@ -32,4 +33,7 @@ public final class FXCollectors {
     return new SetCollector<>(downstream);
   }
 
+  public static <T, R> FXCollector<ObservableValue<T>, ?, R> observing(FXCollector<? super T, ? ,R> downstream) {
+    return new ValueCollector<>(downstream);
+  }
 }

@@ -6,7 +6,7 @@ import java.util.ListIterator;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
-abstract class ObservingListCollector<T, A, R, L extends ObservableList<E>, E>
+public abstract class ObservingListCollector<T, A, R, L extends ObservableList<E>, E>
     extends ObservingCollector<T, A, R, L> {
   protected ObservingListCollector() {}
 
