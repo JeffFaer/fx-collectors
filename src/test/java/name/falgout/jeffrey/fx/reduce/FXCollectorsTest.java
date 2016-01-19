@@ -1,10 +1,13 @@
 package name.falgout.jeffrey.fx.reduce;
 
 import static name.falgout.jeffrey.fx.reduce.FXCollectors.averagingIntegers;
+import static name.falgout.jeffrey.fx.reduce.FXCollectors.combineMaps;
 import static name.falgout.jeffrey.fx.reduce.FXCollectors.observing;
-import static name.falgout.jeffrey.fx.reduce.FXCollectors.toMultiset;
+import static name.falgout.jeffrey.fx.reduce.FXCollectors.toList;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
@@ -31,8 +34,6 @@ import org.mockito.Answers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import com.google.common.collect.Multiset;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FXCollectorsTest {
@@ -161,8 +162,8 @@ public class FXCollectorsTest {
     ObservableList<IntegerProperty> numbers = FXCollections.observableArrayList(p1, p2, p3, p4);
 
     Function<IntegerProperty, ObservableValue<Number>> group = t -> t;
-    ObservableMap<Number, Multiset<IntegerProperty>> counts =
-        FXCollectors.reduceList(numbers, FXCollectors.groupBy(group, toMultiset()));
+    ObservableMap<Number, ObservableList<IntegerProperty>> counts =
+        FXCollectors.reduceList(numbers, FXCollectors.groupBy(group, toList()));
     assertEquals(1, counts.size());
     assertEquals(4, counts.get(0).size());
 
@@ -189,4 +190,68 @@ public class FXCollectorsTest {
     numbers.remove(p3);
     assertFalse(counts.containsKey(3));
   }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void combineMapTest() {
+    ObservableMap<Integer, Integer> m1 = FXCollections.observableHashMap();
+    ObservableMap<Integer, Integer> m2 = FXCollections.observableHashMap();
+    ObservableMap<Integer, Integer> m3 = FXCollections.observableHashMap();
+    ObservableList<ObservableMap<Integer, Integer>> maps =
+        FXCollections.observableArrayList(m1, m2);
+
+    m1.put(1, 5);
+    m1.put(2, 6);
+    m1.put(3, 7);
+
+    m2.put(1, 8);
+
+    ObservableMap<Integer, ObservableList<Integer>> combined =
+        FXCollectors.reduceList(maps, combineMaps(toList()));
+    assertEquals(2, combined.get(1).size());
+    assertEquals(1, combined.get(2).size());
+    assertEquals(1, combined.get(3).size());
+
+    m2.put(2, 9);
+    assertEquals(2, combined.get(2).size());
+
+    m3.put(3, 10);
+    maps.add(m3);
+    assertEquals(2, combined.get(3).size());
+
+    maps.remove(m1);
+    assertEquals(1, combined.get(1).size());
+    assertEquals(1, combined.get(2).size());
+    assertEquals(1, combined.get(3).size());
+
+    m2.remove(1);
+    assertFalse(combined.containsKey(1));
+
+    assertThat(combined.get(3), contains(10));
+    m3.put(3, 11);
+    assertThat(combined.get(3), contains(11));
+  }
+
+  // @Test
+  // public void toSetTest() {
+  // ObservableList<Integer> numbers = FXCollections.observableArrayList(1, 1, 2, 3, 4, 4);
+  //
+  // Set<Integer> distinct = FXCollectors.reduceList(numbers, toSet());
+  // assertEquals(4, distinct.size());
+  // assertThat(distinct, containsInAnyOrder(1, 2, 3, 4));
+  //
+  // numbers.remove((Integer) 1);
+  // assertEquals(4, distinct.size());
+  //
+  // numbers.remove((Integer) 1);
+  // assertEquals(3, distinct.size());
+  // assertFalse(distinct.contains(1));
+  //
+  // numbers.add(2);
+  // assertEquals(3, distinct.size());
+  //
+  // numbers.add(5);
+  // assertEquals(4, distinct.size());
+  // assertTrue(distinct.contains(5));
+  // }
 }

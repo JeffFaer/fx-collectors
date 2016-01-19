@@ -1,6 +1,8 @@
 package name.falgout.jeffrey.fx.reduce;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Function;
@@ -12,10 +14,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
-
-import com.google.common.collect.LinkedHashMultiset;
-import com.google.common.collect.Multiset;
-import com.google.common.collect.Multisets;
 
 public final class FXCollectors {
   private FXCollectors() {}
@@ -139,8 +137,13 @@ public final class FXCollectors {
     return new GroupingCollector<>(grouper, mapFactory, finisher, downstream);
   }
 
-  public static <T> FXCollector<T, ?, Multiset<T>> toMultiset() {
-    return toCollection(LinkedHashMultiset::create, Multisets::unmodifiableMultiset);
+  public static <T> FXCollector<T, ?, ObservableList<T>> toList() {
+    return toList(ArrayList::new);
+  }
+
+  public static <T> FXCollector<T, ?, ObservableList<T>> toList(Supplier<? extends List<T>> ctor) {
+    return toCollection(() -> FXCollections.observableList(ctor.get()),
+        FXCollections::unmodifiableObservableList);
   }
 
   public static <T, C extends Collection<T>> FXCollector<T, ?, C> toCollection(Supplier<C> ctor) {
@@ -152,5 +155,29 @@ public final class FXCollectors {
     Objects.requireNonNull(ctor);
     Objects.requireNonNull(finisher);
     return new ToCollectionCollector<>(ctor, finisher);
+  }
+
+  public static <K, V, R> FXCollector<ObservableMap<K, V>, ?, ObservableMap<K, R>>
+      combineMaps(FXCollector<? super V, ?, R> downstream) {
+    return combineMaps(StandardMapFactory.LINKED_HASH_MAP, downstream);
+  }
+
+  public static <K, V, R> FXCollector<ObservableMap<K, V>, ?, ObservableMap<K, R>>
+      combineMaps(MapFactory mapFactory, FXCollector<? super V, ?, R> downstream) {
+    return combineMaps(mapFactory, FXCollections::unmodifiableObservableMap, downstream);
+  }
+
+  public static <K, V, R> FXCollector<ObservableMap<K, V>, ?, ObservableMap<K, R>> combineMaps(
+      UnaryOperator<ObservableMap<K, R>> finisher, FXCollector<? super V, ?, R> downstream) {
+    return combineMaps(StandardMapFactory.LINKED_HASH_MAP, finisher, downstream);
+  }
+
+  public static <K, V, R> FXCollector<ObservableMap<K, V>, ?, ObservableMap<K, R>> combineMaps(
+      MapFactory mapFactory, UnaryOperator<ObservableMap<K, R>> finisher,
+      FXCollector<? super V, ?, R> downstream) {
+    Objects.requireNonNull(mapFactory);
+    Objects.requireNonNull(finisher);
+    Objects.requireNonNull(downstream);
+    return new MapCombiner<>(mapFactory, finisher, downstream);
   }
 }
