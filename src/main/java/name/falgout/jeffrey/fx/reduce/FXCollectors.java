@@ -1,12 +1,20 @@
 package name.falgout.jeffrey.fx.reduce;
 
+import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
+
+import com.google.common.collect.LinkedHashMultiset;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Multisets;
 
 public final class FXCollectors {
   private FXCollectors() {}
@@ -90,5 +98,42 @@ public final class FXCollectors {
 
   public static FXCollector<Integer, ?, NumberAverage<Integer, Double>> averagingIntegers() {
     return averagingNumber(new IntegerAverage());
+  }
+
+  public static <T, G, R> FXCollector<T, ?, ObservableMap<G, R>> groupBy(
+      Function<? super T, ? extends ObservableValue<G>> grouper,
+      FXCollector<? super T, ?, R> downstream) {
+    return groupBy(grouper, StandardMapFactory.LINKED_HASH_MAP, downstream);
+  }
+
+  public static <T, G, R> FXCollector<T, ?, ObservableMap<G, R>> groupBy(
+      Function<? super T, ? extends ObservableValue<G>> grouper,
+      UnaryOperator<ObservableMap<G, R>> finisher, FXCollector<? super T, ?, R> downstream) {
+    return groupBy(grouper, StandardMapFactory.LINKED_HASH_MAP, finisher, downstream);
+  }
+
+  public static <T, G, R> FXCollector<T, ?, ObservableMap<G, R>> groupBy(
+      Function<? super T, ? extends ObservableValue<G>> grouper, MapFactory mapFactory,
+      FXCollector<? super T, ?, R> downstream) {
+    return groupBy(grouper, mapFactory, FXCollections::unmodifiableObservableMap, downstream);
+  }
+
+  public static <T, G, R> FXCollector<T, ?, ObservableMap<G, R>> groupBy(
+      Function<? super T, ? extends ObservableValue<G>> grouper, MapFactory mapFactory,
+      UnaryOperator<ObservableMap<G, R>> finisher, FXCollector<? super T, ?, R> downstream) {
+    return new GroupingCollector<>(grouper, mapFactory, finisher, downstream);
+  }
+
+  public static <T> FXCollector<T, ?, Multiset<T>> toMultiset() {
+    return toCollection(LinkedHashMultiset::create, Multisets::unmodifiableMultiset);
+  }
+
+  public static <T, C extends Collection<T>> FXCollector<T, ?, C> toCollection(Supplier<C> ctor) {
+    return toCollection(ctor, UnaryOperator.identity());
+  }
+
+  public static <T, C extends Collection<T>> FXCollector<T, ?, C> toCollection(Supplier<C> ctor,
+      UnaryOperator<C> finisher) {
+    return new ToCollectionCollector<>(ctor, finisher);
   }
 }

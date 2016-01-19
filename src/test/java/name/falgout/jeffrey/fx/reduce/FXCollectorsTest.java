@@ -2,6 +2,7 @@ package name.falgout.jeffrey.fx.reduce;
 
 import static name.falgout.jeffrey.fx.reduce.FXCollectors.averagingIntegers;
 import static name.falgout.jeffrey.fx.reduce.FXCollectors.observing;
+import static name.falgout.jeffrey.fx.reduce.FXCollectors.toMultiset;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -11,8 +12,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.LinkedHashMap;
+import java.util.function.Function;
 
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -27,6 +31,8 @@ import org.mockito.Answers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.google.common.collect.Multiset;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FXCollectorsTest {
@@ -144,5 +150,43 @@ public class FXCollectorsTest {
     numbers.set(0, 5);
     assertTrue(average.countProperty().isValid());
     assertEquals(19, (int) average.getSum());
+  }
+
+  @Test
+  public void groupBy() {
+    IntegerProperty p1 = new SimpleIntegerProperty();
+    IntegerProperty p2 = new SimpleIntegerProperty();
+    IntegerProperty p3 = new SimpleIntegerProperty();
+    IntegerProperty p4 = new SimpleIntegerProperty();
+    ObservableList<IntegerProperty> numbers = FXCollections.observableArrayList(p1, p2, p3, p4);
+
+    Function<IntegerProperty, ObservableValue<Number>> group = t -> t;
+    ObservableMap<Number, Multiset<IntegerProperty>> counts =
+        FXCollectors.reduceList(numbers, FXCollectors.groupBy(group, toMultiset()));
+    assertEquals(1, counts.size());
+    assertEquals(4, counts.get(0).size());
+
+    p1.set(1);
+    p2.set(2);
+    p3.set(3);
+    p4.set(4);
+
+    assertEquals(4, counts.size());
+    assertEquals(1, counts.get(1).size());
+    assertEquals(1, counts.get(2).size());
+    assertEquals(1, counts.get(3).size());
+    assertEquals(1, counts.get(4).size());
+    assertFalse(counts.containsKey(0));
+
+    p4.set(1);
+    assertFalse(counts.containsKey(4));
+    assertEquals(2, counts.get(1).size());
+
+    IntegerProperty p5 = new SimpleIntegerProperty(2);
+    numbers.add(p5);
+    assertEquals(2, counts.get(2).size());
+
+    numbers.remove(p3);
+    assertFalse(counts.containsKey(3));
   }
 }
