@@ -2,6 +2,7 @@ package name.falgout.jeffrey.fx.reduce;
 
 import java.util.Collection;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -20,6 +21,9 @@ public final class FXCollectors {
   private FXCollectors() {}
 
   public static <T, A, R> R reduce(T item, FXCollector<? super T, A, R> reduction) {
+    Objects.requireNonNull(item);
+    Objects.requireNonNull(reduction);
+
     A aggregate = reduction.supplier().get();
     reduction.add().accept(aggregate, item);
     return reduction.finisher().apply(aggregate);
@@ -52,16 +56,19 @@ public final class FXCollectors {
 
   public static <T, R> FXCollector<ObservableList<T>, ?, R>
       reducingLists(FXCollector<? super T, ?, R> downstream) {
+    Objects.requireNonNull(downstream);
     return new ListCollector<>(downstream);
   }
 
   public static <T, R> FXCollector<ObservableSet<T>, ?, R>
       reducingSets(FXCollector<? super T, ?, R> downstream) {
+    Objects.requireNonNull(downstream);
     return new SetCollector<>(downstream);
   }
 
   public static <K, V, R> FXCollector<ObservableMap<K, V>, ?, R>
       reducingMaps(FXCollector<? super Entry<K, V>, ?, R> downstream) {
+    Objects.requireNonNull(downstream);
     return new MapCollector<>(downstream);
   }
 
@@ -77,11 +84,14 @@ public final class FXCollectors {
 
   public static <T, R> FXCollector<ObservableValue<T>, ?, R>
       observing(FXCollector<? super T, ?, R> downstream) {
+    Objects.requireNonNull(downstream);
     return new ValueCollector<>(downstream);
   }
 
   public static <T, U, R> FXCollector<T, ?, R> mapping(Function<? super T, ? extends U> map,
       FXCollector<? super U, ?, R> downstream) {
+    Objects.requireNonNull(map);
+    Objects.requireNonNull(downstream);
     return new MappedCollector<>(map, downstream);
   }
 
@@ -93,6 +103,7 @@ public final class FXCollectors {
 
   public static <S extends Number, A extends Number> FXCollector<S, ?, NumberAverage<S, A>>
       averagingNumber(NumberAverage<S, A> average) {
+    Objects.requireNonNull(average);
     return new NumberCollector<>(average);
   }
 
@@ -121,6 +132,10 @@ public final class FXCollectors {
   public static <T, G, R> FXCollector<T, ?, ObservableMap<G, R>> groupBy(
       Function<? super T, ? extends ObservableValue<G>> grouper, MapFactory mapFactory,
       UnaryOperator<ObservableMap<G, R>> finisher, FXCollector<? super T, ?, R> downstream) {
+    Objects.requireNonNull(grouper);
+    Objects.requireNonNull(mapFactory);
+    Objects.requireNonNull(finisher);
+    Objects.requireNonNull(downstream);
     return new GroupingCollector<>(grouper, mapFactory, finisher, downstream);
   }
 
@@ -134,6 +149,8 @@ public final class FXCollectors {
 
   public static <T, C extends Collection<T>> FXCollector<T, ?, C> toCollection(Supplier<C> ctor,
       UnaryOperator<C> finisher) {
+    Objects.requireNonNull(ctor);
+    Objects.requireNonNull(finisher);
     return new ToCollectionCollector<>(ctor, finisher);
   }
 }

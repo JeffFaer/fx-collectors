@@ -23,4 +23,35 @@ public interface FXCollector<T, A, R> {
   }
 
   public Function<A, R> finisher();
+
+  default <RR> FXCollector<T, A, RR> andThen(Function<? super R, ? extends RR> after) {
+    Function<A, RR> finisher = finisher().andThen(after);
+
+    return new FXCollector<T, A, RR>() {
+      @Override
+      public Supplier<A> supplier() {
+        return FXCollector.this.supplier();
+      }
+
+      @Override
+      public BiConsumer<A, T> add() {
+        return FXCollector.this.add();
+      }
+
+      @Override
+      public BiConsumer<A, T> remove() {
+        return FXCollector.this.remove();
+      }
+
+      @Override
+      public UpdateFunction<A, T> update() {
+        return FXCollector.this.update();
+      }
+
+      @Override
+      public Function<A, RR> finisher() {
+        return finisher;
+      }
+    };
+  }
 }
