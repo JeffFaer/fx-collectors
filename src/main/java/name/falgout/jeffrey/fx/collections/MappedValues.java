@@ -75,7 +75,7 @@ public class MappedValues<K, V, R> extends ForwardingMap<K, R> implements Observ
 
   @Override
   public void removeListener(InvalidationListener listener) {
-    source.removeListener(mappedInvalidationListeners.get(listener));
+    source.removeListener(mappedInvalidationListeners.remove(listener));
   }
 
   @Override
@@ -86,6 +86,6 @@ public class MappedValues<K, V, R> extends ForwardingMap<K, R> implements Observ
 
   @Override
   public void removeListener(MapChangeListener<? super K, ? super R> listener) {
-    source.removeListener(mappedChangeListeners.get(listener));
+    source.removeListener(mappedChangeListeners.remove(listener));
   }
 }

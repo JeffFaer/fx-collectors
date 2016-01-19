@@ -137,6 +137,26 @@ public final class FXCollectors {
     return new GroupingCollector<>(grouper, mapFactory, finisher, downstream);
   }
 
+  public static <T> FXCollector<T, ?, ObservableSet<T>> toSet() {
+    return toSet(StandardMapFactory.LINKED_HASH_MAP);
+  }
+
+  public static <T> FXCollector<T, ?, ObservableSet<T>>
+      toSet(UnaryOperator<ObservableSet<T>> finisher) {
+    return toSet(StandardMapFactory.LINKED_HASH_MAP, finisher);
+  }
+
+  public static <T> FXCollector<T, ?, ObservableSet<T>> toSet(MapFactory factory) {
+    return toSet(factory, FXCollections::unmodifiableObservableSet);
+  }
+
+  public static <T> FXCollector<T, ?, ObservableSet<T>> toSet(MapFactory factory,
+      UnaryOperator<ObservableSet<T>> finisher) {
+    Objects.requireNonNull(factory);
+    Objects.requireNonNull(finisher);
+    return new ToSet<>(factory, finisher);
+  }
+
   public static <T> FXCollector<T, ?, ObservableList<T>> toList() {
     return toList(ArrayList::new);
   }

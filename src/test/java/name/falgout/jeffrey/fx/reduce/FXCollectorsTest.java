@@ -4,7 +4,9 @@ import static name.falgout.jeffrey.fx.reduce.FXCollectors.averagingIntegers;
 import static name.falgout.jeffrey.fx.reduce.FXCollectors.combineMaps;
 import static name.falgout.jeffrey.fx.reduce.FXCollectors.observing;
 import static name.falgout.jeffrey.fx.reduce.FXCollectors.toList;
+import static name.falgout.jeffrey.fx.reduce.FXCollectors.toSet;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -232,26 +234,26 @@ public class FXCollectorsTest {
     assertThat(combined.get(3), contains(11));
   }
 
-  // @Test
-  // public void toSetTest() {
-  // ObservableList<Integer> numbers = FXCollections.observableArrayList(1, 1, 2, 3, 4, 4);
-  //
-  // Set<Integer> distinct = FXCollectors.reduceList(numbers, toSet());
-  // assertEquals(4, distinct.size());
-  // assertThat(distinct, containsInAnyOrder(1, 2, 3, 4));
-  //
-  // numbers.remove((Integer) 1);
-  // assertEquals(4, distinct.size());
-  //
-  // numbers.remove((Integer) 1);
-  // assertEquals(3, distinct.size());
-  // assertFalse(distinct.contains(1));
-  //
-  // numbers.add(2);
-  // assertEquals(3, distinct.size());
-  //
-  // numbers.add(5);
-  // assertEquals(4, distinct.size());
-  // assertTrue(distinct.contains(5));
-  // }
+  @Test
+  public void toSetTest() {
+    ObservableList<Integer> numbers = FXCollections.observableArrayList(1, 1, 2, 3, 4, 4);
+
+    ObservableSet<Integer> distinct = FXCollectors.reduceList(numbers, toSet());
+    assertEquals(4, distinct.size());
+    assertThat(distinct, containsInAnyOrder(1, 2, 3, 4));
+
+    numbers.remove((Integer) 1);
+    assertEquals(4, distinct.size());
+
+    numbers.remove((Integer) 1);
+    assertEquals(3, distinct.size());
+    assertFalse(distinct.contains(1));
+
+    numbers.add(2);
+    assertEquals(3, distinct.size());
+
+    numbers.add(5);
+    assertEquals(4, distinct.size());
+    assertTrue(distinct.contains(5));
+  }
 }
