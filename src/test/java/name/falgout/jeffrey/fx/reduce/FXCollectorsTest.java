@@ -9,11 +9,15 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.LinkedHashMap;
+
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 
 import org.junit.Before;
@@ -78,6 +82,33 @@ public class FXCollectorsTest {
 
     objects.remove(o2);
     verify(downstream.remove()).accept(aggregate, o2);
+  }
+
+  @Test
+  public void reduceMapTest() {
+    Object o1 = new Object();
+    Object o2 = new Object();
+    Object o3 = new Object();
+    ObservableMap<Object, Integer> objects = FXCollections.observableMap(new LinkedHashMap<>());
+    objects.put(o1, 1);
+    objects.put(o2, 2);
+    objects.put(o3, 3);
+
+    FXCollectors.reduceMap(objects, downstream);
+    verify(downstream.add()).accept(aggregate, new SimpleImmutableEntry<>(o1, 1));
+    verify(downstream.add()).accept(aggregate, new SimpleImmutableEntry<>(o2, 2));
+    verify(downstream.add()).accept(aggregate, new SimpleImmutableEntry<>(o3, 3));
+
+    Object o4 = new Object();
+    objects.put(o4, 4);
+    verify(downstream.add()).accept(aggregate, new SimpleImmutableEntry<>(o4, 4));
+
+    objects.remove(o2);
+    verify(downstream.remove()).accept(aggregate, new SimpleImmutableEntry<>(o2, 2));
+
+    objects.put(o3, 5);
+    verify(downstream.update()).accept(aggregate, new SimpleImmutableEntry<>(o3, 3),
+        new SimpleImmutableEntry<>(o3, 5));
   }
 
   @Test

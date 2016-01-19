@@ -1,9 +1,11 @@
 package name.falgout.jeffrey.fx.reduce;
 
+import java.util.Map.Entry;
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 
 public final class FXCollectors {
@@ -25,6 +27,21 @@ public final class FXCollectors {
     return reduce(set, reducingSets(reduction));
   }
 
+  public static <K, V, R> R reduceMap(ObservableMap<K, V> map,
+      FXCollector<? super Entry<K, V>, ?, R> reduction) {
+    return reduce(map, reducingMaps(reduction));
+  }
+
+  public static <K, V, R> R reduceMapKeys(ObservableMap<K, V> map,
+      FXCollector<? super K, ?, R> reduction) {
+    return reduce(map, reducingMapKeys(reduction));
+  }
+
+  public static <K, V, R> R reduceMapValues(ObservableMap<K, V> map,
+      FXCollector<? super V, ?, R> reduction) {
+    return reduce(map, reducingMapValues(reduction));
+  }
+
   public static <T, R> FXCollector<ObservableList<T>, ?, R>
       reducingLists(FXCollector<? super T, ?, R> downstream) {
     return new ListCollector<>(downstream);
@@ -33,6 +50,21 @@ public final class FXCollectors {
   public static <T, R> FXCollector<ObservableSet<T>, ?, R>
       reducingSets(FXCollector<? super T, ?, R> downstream) {
     return new SetCollector<>(downstream);
+  }
+
+  public static <K, V, R> FXCollector<ObservableMap<K, V>, ?, R>
+      reducingMaps(FXCollector<? super Entry<K, V>, ?, R> downstream) {
+    return new MapCollector<>(downstream);
+  }
+
+  public static <K, V, R> FXCollector<ObservableMap<K, V>, ?, R>
+      reducingMapKeys(FXCollector<? super K, ?, R> downstream) {
+    return reducingMaps(mapping(Entry::getKey, downstream));
+  }
+
+  public static <K, V, R> FXCollector<ObservableMap<K, V>, ?, R>
+      reducingMapValues(FXCollector<? super V, ?, R> downstream) {
+    return reducingMaps(mapping(Entry::getValue, downstream));
   }
 
   public static <T, R> FXCollector<ObservableValue<T>, ?, R>

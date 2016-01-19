@@ -9,11 +9,11 @@ public abstract class ObservingSetCollector<T, A, R, S extends ObservableSet<E>,
 
   @Override
   protected final Runnable observe(A aggregate, T item, S observable) {
-    SetChangeListener<E> listener = c -> {
-      if (c.wasAdded()) {
-        add(aggregate, item, observable, c.getElementAdded());
-      } else if (c.wasRemoved()) {
-        remove(aggregate, item, observable, c.getElementRemoved());
+    SetChangeListener<E> listener = setChange -> {
+      if (setChange.wasAdded()) {
+        add(aggregate, item, observable, setChange.getElementAdded());
+      } else if (setChange.wasRemoved()) {
+        remove(aggregate, item, observable, setChange.getElementRemoved());
       }
     };
     observable.addListener(listener);

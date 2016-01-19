@@ -12,19 +12,21 @@ public abstract class ObservingListCollector<T, A, R, L extends ObservableList<E
 
   @Override
   protected final Runnable observe(A aggregate, T item, L observable) {
-    ListChangeListener<E> listener = c -> {
-      while (c.next()) {
-        if (c.wasReplaced()) {
-          ListIterator<? extends E> oldValues = c.getRemoved().listIterator(c.getRemovedSize());
-          ListIterator<? extends E> newValues = c.getAddedSubList().listIterator(c.getAddedSize());
+    ListChangeListener<E> listener = listChange -> {
+      while (listChange.next()) {
+        if (listChange.wasReplaced()) {
+          ListIterator<? extends E> oldValues =
+              listChange.getRemoved().listIterator(listChange.getRemovedSize());
+          ListIterator<? extends E> newValues =
+              listChange.getAddedSubList().listIterator(listChange.getAddedSize());
           while (oldValues.hasPrevious()) {
-            int i = oldValues.previousIndex() + c.getFrom();
+            int i = oldValues.previousIndex() + listChange.getFrom();
             update(aggregate, item, observable, oldValues.previous(), newValues.previous(), i);
           }
-        } else if (c.wasRemoved()) {
-          remove(aggregate, item, observable, c.getRemoved(), c.getFrom());
-        } else if (c.wasAdded()) {
-          add(aggregate, item, observable, c.getAddedSubList(), c.getFrom());
+        } else if (listChange.wasRemoved()) {
+          remove(aggregate, item, observable, listChange.getRemoved(), listChange.getFrom());
+        } else if (listChange.wasAdded()) {
+          add(aggregate, item, observable, listChange.getAddedSubList(), listChange.getFrom());
         }
       }
     };
