@@ -31,4 +31,9 @@ class ValueCollector<T, A, R> extends SimpleObservingValueCollector<ObservableVa
   protected void remove(A aggregate, ObservableValue<T> item, T value) {
     downstream.remove().accept(aggregate, value);
   }
+
+  @Override
+  protected void update(A aggregate, ObservableValue<T> item, T oldValue, T newValue) {
+    downstream.update().accept(aggregate, oldValue, newValue);
+  }
 }

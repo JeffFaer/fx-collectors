@@ -1,5 +1,10 @@
 package name.falgout.jeffrey.fx.reduce;
 
+import static name.falgout.jeffrey.fx.reduce.FXCollectors.averagingIntegers;
+import static name.falgout.jeffrey.fx.reduce.FXCollectors.observing;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,8 +57,7 @@ public class FXCollectorsTest {
 
     Object o5 = new Object();
     Object replaced = objects.set(0, o5);
-    verify(downstream.remove()).accept(aggregate, replaced);
-    verify(downstream.add()).accept(aggregate, o5);
+    verify(downstream.update()).accept(aggregate, replaced, o5);
   }
 
   @Test
@@ -79,13 +83,35 @@ public class FXCollectorsTest {
   @Test
   public void reduceObservableValue() {
     Property<Object> prop = new SimpleObjectProperty<>();
-    FXCollector<ObservableValue<Object>, ?, ?> coll = FXCollectors.observing(downstream);
+    FXCollector<ObservableValue<Object>, ?, ?> coll = observing(downstream);
 
     FXCollectors.reduce(prop, coll);
     verify(downstream.add()).accept(aggregate, null);
 
     prop.setValue(new Object());
-    verify(downstream.remove()).accept(aggregate, null);
-    verify(downstream.add()).accept(aggregate, prop.getValue());
+    verify(downstream.update()).accept(aggregate, null, prop.getValue());
+  }
+
+  @Test
+  public void integerAverage() {
+    ObservableList<Integer> numbers = FXCollections.observableArrayList();
+
+    NumberAverage<Integer, Double> average = FXCollectors.reduceList(numbers, averagingIntegers());
+    assertEquals(0, (int) average.getSum());
+    assertEquals(0, average.getCount());
+    assertFalse(average.getAverage().isPresent());
+
+    numbers.addAll(1, 2, 3, 4, 5);
+    assertFalse(average.averageProperty().isValid());
+    assertFalse(average.sumProperty().isValid());
+    assertFalse(average.countProperty().isValid());
+
+    assertEquals(5, average.getCount());
+    assertEquals(15, (int) average.getSum());
+    assertEquals(3.0, average.getAverage().get(), 0);
+
+    numbers.set(0, 5);
+    assertTrue(average.countProperty().isValid());
+    assertEquals(19, (int) average.getSum());
   }
 }

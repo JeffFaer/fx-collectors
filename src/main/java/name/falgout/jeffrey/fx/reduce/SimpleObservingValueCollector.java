@@ -17,12 +17,12 @@ public abstract class SimpleObservingValueCollector<T extends ObservableValue<V>
   }
 
   @Override
-  protected void remove(A aggregate, T item, T observable, V value) {
+  protected final void remove(A aggregate, T item, T observable, V value) {
     remove(aggregate, item, value);
   }
 
   @Override
-  protected void update(A aggregate, T item, T observable, V oldValue, V newValue) {
+  protected final void update(A aggregate, T item, T observable, V oldValue, V newValue) {
     update(aggregate, item, oldValue, newValue);
   }
 

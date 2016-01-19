@@ -50,4 +50,13 @@ public final class FXCollectors {
       FXCollector<? super U, ?, R> downstream) {
     return mapping(map, observing(downstream));
   }
+
+  public static <S extends Number, A extends Number> FXCollector<S, ?, NumberAverage<S, A>>
+      averagingNumber(NumberAverage<S, A> average) {
+    return new NumberCollector<>(average);
+  }
+
+  public static FXCollector<Integer, ?, NumberAverage<Integer, Double>> averagingIntegers() {
+    return averagingNumber(new IntegerAverage());
+  }
 }

@@ -31,4 +31,10 @@ class ListCollector<E, A, R> extends SimpleObservingListCollector<ObservableList
   protected void remove(A aggregate, ObservableList<E> item, E element, int index) {
     downstream.remove().accept(aggregate, element);
   }
+
+  @Override
+  protected void update(A aggregate, ObservableList<E> item, E oldElement, E newElement,
+      int index) {
+    downstream.update().accept(aggregate, oldElement, newElement);
+  }
 }
