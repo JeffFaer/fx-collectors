@@ -46,6 +46,11 @@ public class FXCollectorsTest {
 
     objects.remove(o2);
     verify(downstream.remove()).accept(aggregate, o2);
+
+    Object o5 = new Object();
+    Object replaced = objects.set(0, o5);
+    verify(downstream.remove()).accept(aggregate, replaced);
+    verify(downstream.add()).accept(aggregate, o5);
   }
 
   @Test
