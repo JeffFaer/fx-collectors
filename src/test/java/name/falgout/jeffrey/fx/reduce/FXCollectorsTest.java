@@ -13,12 +13,14 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.LinkedHashMap;
 import java.util.function.Function;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -41,6 +43,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class FXCollectorsTest {
   @Mock(answer = Answers.RETURNS_DEEP_STUBS) FXCollector<Object, Object, Object> downstream;
   Object aggregate;
+
+  @Mock InvalidationListener listener;
 
   @Before
   public void before() {
@@ -142,17 +146,18 @@ public class FXCollectorsTest {
     assertFalse(average.getAverage().isPresent());
 
     numbers.addAll(1, 2, 3, 4, 5);
-    assertFalse(average.averageProperty().isValid());
-    assertFalse(average.sumProperty().isValid());
-    assertFalse(average.countProperty().isValid());
-
     assertEquals(5, average.getCount());
     assertEquals(15, (int) average.getSum());
     assertEquals(3.0, average.getAverage().get(), 0);
 
+    average.sumProperty().addListener(listener);
+    average.countProperty().addListener(listener);
     numbers.set(0, 5);
-    assertTrue(average.countProperty().isValid());
     assertEquals(19, (int) average.getSum());
+
+    // Verify that update was called correctly.
+    verify(listener).invalidated(average.sumProperty());
+    verifyNoMoreInteractions(listener);
   }
 
   @Test

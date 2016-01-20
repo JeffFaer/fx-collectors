@@ -2,25 +2,25 @@ package name.falgout.jeffrey.fx.reduce;
 
 import java.util.Optional;
 
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.LongBinding;
+import javafx.beans.property.LongProperty;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableLongValue;
+import javafx.beans.value.ObservableValue;
 
 public abstract class NumberAverage<S extends Number, A extends Number> {
-  private final Binding<S> sumBinding;
-  private final LongBinding countBinding;
-  private final Binding<A> average;
-
-  private S sum;
-  private long count = 0;
+  private final Property<S> sum;
+  private final LongProperty count;
+  private final ObservableValue<A> average;
 
   public NumberAverage() {
-    sum = zero();
+    sum = new SimpleObjectProperty<>(zero());
+    count = new SimpleLongProperty();
 
-    sumBinding = Bindings.createObjectBinding(() -> sum);
-    countBinding = Bindings.createLongBinding(() -> count);
-    average = Bindings.createObjectBinding(() -> count == 0 ? null : divide(sum, count), sumBinding,
-        countBinding);
+    average = Bindings.createObjectBinding(
+        () -> count.get() == 0 ? null : divide(sum.getValue(), count.get()), sum, count);
   }
 
   protected abstract S zero();
@@ -32,37 +32,29 @@ public abstract class NumberAverage<S extends Number, A extends Number> {
   protected abstract A divide(S numerator, long denominator);
 
   public void add(S number) {
-    sum = add(sum, number);
-    count += 1;
-
-    sumBinding.invalidate();
-    countBinding.invalidate();
+    sum.setValue(add(sum.getValue(), number));
+    count.set(count.get() + 1);
   }
 
   public void remove(S number) {
-    sum = add(sum, negate(number));
-    count -= 1;
-
-    sumBinding.invalidate();
-    countBinding.invalidate();
+    sum.setValue(add(sum.getValue(), negate(number)));
+    count.set(count.get() - 1);
   }
 
   public void update(S oldNumber, S newNumber) {
-    sum = add(sum, newNumber);
-    sum = add(sum, negate(oldNumber));
-
-    sumBinding.invalidate();
+    S delta = add(newNumber, negate(oldNumber));
+    sum.setValue(add(sum.getValue(), delta));
   }
 
-  public Binding<S> sumProperty() {
-    return sumBinding;
+  public ObservableValue<S> sumProperty() {
+    return sum;
   }
 
-  public LongBinding countProperty() {
-    return countBinding;
+  public ObservableLongValue countProperty() {
+    return count;
   }
 
-  public Binding<A> averageProperty() {
+  public ObservableValue<A> averageProperty() {
     return average;
   }
 
