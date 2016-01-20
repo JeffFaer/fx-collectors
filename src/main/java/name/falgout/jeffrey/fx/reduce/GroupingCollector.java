@@ -10,10 +10,11 @@ import javafx.collections.ObservableMap;
 class GroupingCollector<T, A, R, G> extends
     ObservingValueCollector<T, ObservableMap<G, A>, ObservableMap<G, R>, ObservableValue<G>, G> {
   private final Function<? super T, ? extends ObservableValue<G>> grouper;
-  private final MapReductionHelper<G,T,A,R> helper;
+  private final MapReductionHelper<G, T, A, R> helper;
 
-  GroupingCollector(Function<? super T, ? extends ObservableValue<G>> grouper, MapFactory factory,
-      UnaryOperator<ObservableMap<G, R>> finisher, FXCollector<? super T, A, R> downstream) {
+  GroupingCollector(Function<? super T, ? extends ObservableValue<G>> grouper,
+      ObservableMapFactory factory, UnaryOperator<ObservableMap<G, R>> finisher,
+      FXCollector<? super T, A, R> downstream) {
     this.grouper = grouper;
     helper = new MapReductionHelper<>(factory, finisher, downstream);
   }

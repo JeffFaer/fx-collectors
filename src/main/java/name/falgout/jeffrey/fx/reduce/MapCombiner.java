@@ -10,7 +10,7 @@ class MapCombiner<K, V, A, R> extends
     SimpleObservingMapCollector<ObservableMap<K, V>, ObservableMap<K, A>, ObservableMap<K, R>, K, V> {
   private final MapReductionHelper<K, V, A, R> helper;
 
-  MapCombiner(MapFactory factory, UnaryOperator<ObservableMap<K, R>> finisher,
+  MapCombiner(ObservableMapFactory factory, UnaryOperator<ObservableMap<K, R>> finisher,
       FXCollector<? super V, A, R> downstream) {
     helper = new MapReductionHelper<>(factory, finisher, downstream);
   }

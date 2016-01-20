@@ -4,19 +4,18 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
 import name.falgout.jeffrey.fx.collections.MappedValues;
 
 class MapReductionHelper<K, V, A, R> {
-  private final MapFactory factory;
+  private final ObservableMapFactory factory;
   private final UnaryOperator<ObservableMap<K, R>> finisher;
   private final FXCollector<? super V, A, R> downstream;
 
   private final Map<A, Integer> counts = new IdentityHashMap<>();
 
-  MapReductionHelper(MapFactory factory, UnaryOperator<ObservableMap<K, R>> finisher,
+  MapReductionHelper(ObservableMapFactory factory, UnaryOperator<ObservableMap<K, R>> finisher,
       FXCollector<? super V, A, R> downstream) {
     this.factory = factory;
     this.finisher = finisher;
@@ -24,7 +23,7 @@ class MapReductionHelper<K, V, A, R> {
   }
 
   public ObservableMap<K, A> getAggregateMap() {
-    return FXCollections.observableMap(factory.createMap());
+    return factory.createMap();
   }
 
   public ObservableMap<K, R> finish(ObservableMap<K, A> aggregate) {

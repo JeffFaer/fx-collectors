@@ -5,6 +5,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface FXCollector<T, A, R> {
+  @FunctionalInterface
   public interface UpdateFunction<A, T> {
     public void accept(A aggregate, T oldValue, T newValue);
   }

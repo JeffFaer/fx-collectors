@@ -109,6 +109,14 @@ public final class FXCollectors {
     return averagingNumber(new IntegerAverage());
   }
 
+  public static FXCollector<Long, ?, NumberAverage<Long, Double>> averagingLongs() {
+    return averagingNumber(new LongAverage());
+  }
+
+  public static FXCollector<Double, ?, NumberAverage<Double, Double>> averagingDoubles() {
+    return averagingNumber(new DoubleAverage());
+  }
+
   public static <T, G, R> FXCollector<T, ?, ObservableMap<G, R>> groupBy(
       Function<? super T, ? extends ObservableValue<G>> grouper,
       FXCollector<? super T, ?, R> downstream) {
@@ -124,11 +132,23 @@ public final class FXCollectors {
   public static <T, G, R> FXCollector<T, ?, ObservableMap<G, R>> groupBy(
       Function<? super T, ? extends ObservableValue<G>> grouper, MapFactory mapFactory,
       FXCollector<? super T, ?, R> downstream) {
+    return groupBy(grouper, ObservableMapFactory.fromMapFactory(mapFactory), downstream);
+  }
+
+  public static <T, G, R> FXCollector<T, ?, ObservableMap<G, R>> groupBy(
+      Function<? super T, ? extends ObservableValue<G>> grouper, ObservableMapFactory mapFactory,
+      FXCollector<? super T, ?, R> downstream) {
     return groupBy(grouper, mapFactory, FXCollections::unmodifiableObservableMap, downstream);
   }
 
   public static <T, G, R> FXCollector<T, ?, ObservableMap<G, R>> groupBy(
       Function<? super T, ? extends ObservableValue<G>> grouper, MapFactory mapFactory,
+      UnaryOperator<ObservableMap<G, R>> finisher, FXCollector<? super T, ?, R> downstream) {
+    return groupBy(grouper, ObservableMapFactory.fromMapFactory(mapFactory), finisher, downstream);
+  }
+
+  public static <T, G, R> FXCollector<T, ?, ObservableMap<G, R>> groupBy(
+      Function<? super T, ? extends ObservableValue<G>> grouper, ObservableMapFactory mapFactory,
       UnaryOperator<ObservableMap<G, R>> finisher, FXCollector<? super T, ?, R> downstream) {
     Objects.requireNonNull(grouper);
     Objects.requireNonNull(mapFactory);
@@ -147,10 +167,19 @@ public final class FXCollectors {
   }
 
   public static <T> FXCollector<T, ?, ObservableSet<T>> toSet(MapFactory factory) {
+    return toSet(ObservableMapFactory.fromMapFactory(factory));
+  }
+
+  public static <T> FXCollector<T, ?, ObservableSet<T>> toSet(ObservableMapFactory factory) {
     return toSet(factory, FXCollections::unmodifiableObservableSet);
   }
 
   public static <T> FXCollector<T, ?, ObservableSet<T>> toSet(MapFactory factory,
+      UnaryOperator<ObservableSet<T>> finisher) {
+    return toSet(ObservableMapFactory.fromMapFactory(factory), finisher);
+  }
+
+  public static <T> FXCollector<T, ?, ObservableSet<T>> toSet(ObservableMapFactory factory,
       UnaryOperator<ObservableSet<T>> finisher) {
     Objects.requireNonNull(factory);
     Objects.requireNonNull(finisher);
@@ -184,6 +213,11 @@ public final class FXCollectors {
 
   public static <K, V, R> FXCollector<ObservableMap<K, V>, ?, ObservableMap<K, R>>
       combineMaps(MapFactory mapFactory, FXCollector<? super V, ?, R> downstream) {
+    return combineMaps(ObservableMapFactory.fromMapFactory(mapFactory), downstream);
+  }
+
+  public static <K, V, R> FXCollector<ObservableMap<K, V>, ?, ObservableMap<K, R>>
+      combineMaps(ObservableMapFactory mapFactory, FXCollector<? super V, ?, R> downstream) {
     return combineMaps(mapFactory, FXCollections::unmodifiableObservableMap, downstream);
   }
 
@@ -194,6 +228,12 @@ public final class FXCollectors {
 
   public static <K, V, R> FXCollector<ObservableMap<K, V>, ?, ObservableMap<K, R>> combineMaps(
       MapFactory mapFactory, UnaryOperator<ObservableMap<K, R>> finisher,
+      FXCollector<? super V, ?, R> downstream) {
+    return combineMaps(ObservableMapFactory.fromMapFactory(mapFactory), finisher, downstream);
+  }
+
+  public static <K, V, R> FXCollector<ObservableMap<K, V>, ?, ObservableMap<K, R>> combineMaps(
+      ObservableMapFactory mapFactory, UnaryOperator<ObservableMap<K, R>> finisher,
       FXCollector<? super V, ?, R> downstream) {
     Objects.requireNonNull(mapFactory);
     Objects.requireNonNull(finisher);

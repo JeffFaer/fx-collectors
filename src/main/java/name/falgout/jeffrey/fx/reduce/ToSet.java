@@ -38,7 +38,7 @@ class ToSet<T> implements FXCollector<T, ObservableMap<T, Object>, ObservableSet
   private final MapReductionHelper<T, Object, Object, Object> helper;
   private final UnaryOperator<ObservableSet<T>> finisher;
 
-  ToSet(MapFactory factory, UnaryOperator<ObservableSet<T>> finisher) {
+  ToSet(ObservableMapFactory factory, UnaryOperator<ObservableSet<T>> finisher) {
     helper = new MapReductionHelper<>(factory, UnaryOperator.identity(), NULL_COLLECTOR);
     this.finisher = finisher;
   }
